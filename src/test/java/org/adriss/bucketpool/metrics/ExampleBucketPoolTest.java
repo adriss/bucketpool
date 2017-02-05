@@ -17,6 +17,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 
 import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.Cluster;
+import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
 
@@ -27,6 +29,13 @@ public class ExampleBucketPoolTest {
 
     @Before
     public void before() throws Exception {
+        // setup new document if it doesn't exist
+        Cluster cluster = CouchbaseCluster.create("localhost");
+        Bucket bucket = cluster.openBucket("default");
+        bucket.upsert(JsonDocument.create("u:example", JsonObject.create().put("name", "myDoc")));
+        bucket.close();
+        cluster.disconnect();
+
         BucketPoolConfig config = new BucketPoolConfig();
         config.setMaxTotal(4);
         config.setMaxIdle(3);
@@ -38,7 +47,7 @@ public class ExampleBucketPoolTest {
     }
 
     @Test
-    public void test() {
+    public void upsert() {
         ExecutorService executor = Executors.newFixedThreadPool(100);
         long startTime = System.nanoTime();
         Set<Future<Boolean>> futures = new HashSet<>();

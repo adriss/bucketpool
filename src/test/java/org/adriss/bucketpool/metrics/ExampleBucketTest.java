@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -22,8 +23,18 @@ import com.couchbase.client.java.document.json.JsonObject;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class ExampleBucketTest {
 
+    @Before
+    public void before() {
+        // setup new document if it doesn't exist
+        Cluster cluster = CouchbaseCluster.create("localhost");
+        Bucket bucket = cluster.openBucket("default");
+        bucket.upsert(JsonDocument.create("u:example", JsonObject.create().put("name", "myDoc")));
+        bucket.close();
+        cluster.disconnect();
+    }
+
     @Test
-    public void test() {
+    public void upsert() {
         ExecutorService executor = Executors.newFixedThreadPool(100);
         Cluster cluster = CouchbaseCluster.create("localhost");
         Bucket bucket = cluster.openBucket("default");
