@@ -8,15 +8,14 @@ before_install:
   - sudo wget http://packages.couchbase.com/releases/2.0.0/couchbase-server-enterprise_x86_64_2.0.0.deb
   - sudo dpkg -i couchbase-server-enterprise_x86_64_2.0.0.deb
   - sudo service couchbase-server start
+  - sudo couchbase-cli bucket-create -c localhost:8091 -u Administrator -p password --bucket=default --bucket-type=couchbase --bucket-ramsize=200
 #sudo: false
 cache:
   directories:
     - $HOME/.m2/repository
 jdk:
   - oraclejdk8
-
 install: /bin/true
-
 script:
   - mvn install -Dskip.unit.tests=true -Dmaven.javadoc.skip=true -V -B
   - mvn test coveralls:report -V -P coverage
