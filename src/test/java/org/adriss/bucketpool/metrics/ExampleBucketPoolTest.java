@@ -39,6 +39,9 @@ public class ExampleBucketPoolTest {
         config.setMaxIdle((int) Math.ceil(NUMBER_OF_PROCESSORS / 2));
         config.setMinIdle((int) Math.ceil(NUMBER_OF_PROCESSORS / 4));
         config.setPassivate(false);
+        System.out.println("Max total:" + config.getMaxTotal());
+        System.out.println("Max idle:" + config.getMaxIdle());
+        System.out.println("Min idle:" + config.getMinIdle());
         config.setName("default");
         config.setNodes("localhost");
         this.bucketPool = new BucketPool(config);
