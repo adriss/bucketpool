@@ -17,8 +17,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 
 import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.json.JsonObject;
 
@@ -26,20 +24,19 @@ import com.couchbase.client.java.document.json.JsonObject;
 public class ExampleBucketPoolTest {
 
     private BucketPool bucketPool;
+    private float NUMBER_OF_PROCESSORS = Runtime.getRuntime().availableProcessors();
+    private int EXPECTED_THREAD_EXECUTION_TIME_IN_MILLS = 1000;
 
     @Before
     public void before() throws Exception {
-        // setup new document if it doesn't exist
-        Cluster cluster = CouchbaseCluster.create("localhost");
-        Bucket bucket = cluster.openBucket("default");
-        bucket.upsert(JsonDocument.create("u:example", JsonObject.create().put("name", "myDoc")));
-        bucket.close();
-        cluster.disconnect();
+        // get the runtime object associated with the current Java application
+        Runtime runtime = Runtime.getRuntime();
+        // get the number of processors available to the Java virtual machine
 
         BucketPoolConfig config = new BucketPoolConfig();
-        config.setMaxTotal(4);
-        config.setMaxIdle(3);
-        config.setMinIdle(2);
+        config.setMaxTotal((int) NUMBER_OF_PROCESSORS);
+        config.setMaxIdle((int) Math.ceil(NUMBER_OF_PROCESSORS / 2));
+        config.setMinIdle((int) Math.ceil(NUMBER_OF_PROCESSORS / 4));
         config.setPassivate(false);
         config.setName("default");
         config.setNodes("localhost");
@@ -81,6 +78,7 @@ public class ExampleBucketPoolTest {
         }).count();
         System.out.println("Total execution time in millis: " + (System.nanoTime() - startTime) / 1000000);
         Assert.assertEquals(amount, count);
-        Assert.assertTrue((System.nanoTime() - startTime) / 1000000 < 1500);
+        Assert.assertTrue("Execution time was more than expected", ((System.nanoTime() - startTime)
+                / 1000000) < (EXPECTED_THREAD_EXECUTION_TIME_IN_MILLS * NUMBER_OF_PROCESSORS) / 2);
     }
 }
