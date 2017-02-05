@@ -24,7 +24,8 @@ import com.couchbase.client.java.document.json.JsonObject;
 public class ExampleBucketPoolTest {
 
     private BucketPool bucketPool;
-    private float NUMBER_OF_PROCESSORS = Runtime.getRuntime().availableProcessors();
+    private float NUMBER_OF_PROCESSORS = Runtime.getRuntime().availableProcessors() == 0 ? 1
+            : Runtime.getRuntime().availableProcessors();
     private int EXPECTED_THREAD_EXECUTION_TIME_IN_MILLS = 1000;
 
     @Before
